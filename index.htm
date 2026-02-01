@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Minimal Monaco - Lua Editor</title>
+
+<!-- Monaco loader -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.33.0/min/vs/loader.min.js"></script>
+
+<style>
+  :root{
+    --bg: #0B1118;
+    --sidebar-bg: #070B10;
+    --sidebar-border: #3A3A3A;
+    --tab-active: #3A82F7;
+    --tab-inactive: #0B1118;
+    --text: #E8EDF4;
+    --muted: #334155;
+    --accent: #2F6FD6;
+  }
+
+  html,body{height:100%;margin:0;background:var(--bg);font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;}
+  #app { display:flex; height:100vh; width:100vw; color:var(--text); box-sizing:border-box; }
+
+  /* Sidebar */
+  #sidebar {
+    width: 240px;
+    min-width: 160px;
+    background:var(--sidebar-bg);
+    border-right:1px solid var(--sidebar-border);
+    display:flex;
+    flex-direction:column;
+    padding:12px;
+    gap:10px;
+  }
+  .sidebar-header {
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:14px;
+    font-weight:600;
+    color:var(--text);
+  }
+  .sidebar-header svg { width:18px;height:18px; color:var(--text); flex-shrink:0; }
+
+  #file-actions { display:flex; gap:8px; align-items:center; margin-left:auto; }
+  .btn { background:transparent; border:1px solid rgba(255,255,255,0.03); color:var(--text); padding:6px 8px; border-radius:6px; cursor:pointer; font-size:13px; }
+  .btn:hover { filter:brightness(1.15); }
+
+  .files-list { flex:1; overflow:auto; padding-right:6px; display:flex; flex-direction:column; gap:6px; margin-top:6px; }
+  .file-item {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:8px;
+    border-radius:6px;
+    cursor:pointer;
+    font-size:13px;
+    color:var(--text);
+  }
+  .file-item:hover { background: rgba(255,255,255,0.02); transform: translateX(4px); transition:all .16s ease; }
+  .file-item .name { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1; margin-right:8px; }
+  .file-item svg { width:18px; height:18px; opacity:0.9; flex-shrink:0; }
+
+  /* Right area: tabs + editor */
+  #right {
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    gap:0;
+    height:100vh;
+    min-width:300px;
+  }
+
+  /* Tabs */
+  #tabs-bar {
+    height:44px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:8px;
+    background:transparent;
+    border-bottom:1px solid rgba(255,255,255,0.02);
+  }
+  .tab {
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding:6px 10px;
+    border-radius:3px;
+    border:1px solid var(--tab-inactive);
+    background:var(--tab-inactive);
+    color:var(--text);
+    cursor:pointer;
+    position:relative;
+    opacity:0;
+    animation:fadeIn .3s forwards;
+  }
+  .tab.active { background:var(--tab-active); border-color:var(--tab-active); color:white; }
+  .tab .label { font-size:13px; font-weight:600; max-width:160px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .tab .close {
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width:22px;height:22px;border-radius:4px;
+    cursor:pointer; opacity:0.85;
+  }
+  .tab .close svg{ width:14px;height:14px; color:rgba(0,0,0,0.7); }
+  .tab:hover .close svg{ color:white; }
+
+  @keyframes fadeIn { from { opacity:0; transform: translateY(-6px); } to { opacity:1; transform:none; } }
+  @keyframes fadeOut { from { opacity:1; transform:none; } to { opacity:0; transform: translateY(-6px); } }
+
+  #tab-add {
+    margin-left:6px;
+    background:transparent;border:none;cursor:pointer;padding:6px;border-radius:6px;
+  }
+  #tab-add svg{ width:20px;height:20px; }
+
+  /* Editor container */
+  #editor-wrap { flex:1; position:relative; display:flex; min-height:0; } /* min-height:0 for flex children to allow proper overflow */
+  #editor { flex:1; height:100%; position:relative; }
+
+  /* Make Monaco take full area */
+  .monaco-editor, .monaco-editor .overflow-guard, .monaco-editor .monaco-scrollable-element {
+    height:100% !important;
+  }
+
+  /* small responsive */
+  @media (max-width:800px){
+    #sidebar{ width:180px; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <aside id="sidebar" role="navigation" aria-label="File Explorer">
+    <div style="display:flex;align-items:center;gap:8px;">
+      <div class="sidebar-header">
+        <!-- Folder SVG (provided) -->
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill="currentColor" d="M20 5h-9.586L8.707 3.293A1 1 0 0 0 8 3H4c-1.103 0-2 .897-2 2v14c0 1.103.897 2 2 2h16c1.103 0 2-.897 2-2V7c0-1.103-.897-2-2-2"/></svg>
+        <span>Scripts</span>
+      </div>
+      <div id="file-actions" style="margin-left:auto">
+        <button id="btn-refresh" class="btn" title="Refresh files">Refresh</button>
+      </div>
+    </div>
+
+    <div class="files-list" id="files-list" aria-live="polite"></div>
+    <div style="font-size:12px;color:rgba(255,255,255,0.55);padding-top:8px;">Click a file to load it into the active tab.</div>
+  </aside>
+
+  <div id="right">
+    <div id="tabs-bar" role="tablist" aria-label="Editor Tabs">
+      <!-- tabs injected here -->
+      <button id="tab-add" title="Add Tab" aria-label="Add Tab" >
+        <!-- Add SVG (animated) -->
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><g fill="none" stroke="#CCCCCC" stroke-dasharray="16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M5 12h14"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.5s" values="16;0"/></path><path stroke-dashoffset="16" d="M12 5v14"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.5s" dur="0.5s" to="0"/></path></g></svg>
+      </button>
+    </div>
+
+    <div id="editor-wrap">
+      <div id="editor"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* -----------------------
+   Minimal Monaco Editor App
+   - Tabs system with sequential renumbering
+   - Sidebar explorer (requests host for file list)
+   - Minimap enabled
+   - Custom theme "CustomTheme" exactly as specified
+   - Intellisense completion provider for Lua
+   - Bridge: JS->C# (requestFiles), C#->JS (openFileInEditor)
+   ----------------------- */
+
+(function(){
+  // State
+  const tabs = []; // {id, name, content, element}
+  let activeTabId = null;
+  let editor = null;
+  let monacoIsReady = false;
+
+  // DOM refs
+  const tabsBar = document.getElementById('tabs-bar');
+  const tabAddBtn = document.getElementById('tab-add');
+  const filesList = document.getElementById('files-list');
+  const btnRefresh = document.getElementById('btn-refresh');
+  const editorContainer = document.getElementById('editor');
+
+  // Helper: post to host (WebView2)
+  function postToHost(obj){
+    try{
+      const json = typeof obj === 'string' ? obj : JSON.stringify(obj);
+      if (window.chrome && window.chrome.webview && window.chrome.webview.postMessage) {
+        window.chrome.webview.postMessage(json);
+      } else {
+        // fallback for browser: emit window message
+        window.postMessage(obj, '*');
+        console.log('[postToHost mock]', obj);
+      }
+    } catch(e){ console.error(e); }
+  }
+
+  // ---------- Tabs management ----------
+  function renumberTabsDOM(){
+    // Ensure labels are "Script 1" .. "Script n" or keep custom filenames if file loaded
+    const currentCount = tabs.length;
+    for (let i=0;i<tabs.length;i++){
+      const t = tabs[i];
+      // If tab has custom filename property (t.filename), keep it, else set Script N
+      const label = t.filename ? t.filename : `Script ${i+1}`;
+      t.name = label;
+      if (t.element){
+        const lbl = t.element.querySelector('.label');
+        if (lbl) lbl.textContent = label;
+      }
+    }
+  }
+
+  function createTab(initialContent = '', filename = null){
+    const id = Date.now() + Math.floor(Math.random()*1000);
+    const tabObj = { id, name: null, content: initialContent, element: null, filename: filename || null };
+    tabs.push(tabObj);
+    renumberTabsDOM();
+
+    // DOM element
+    const tabEl = document.createElement('div');
+    tabEl.className = 'tab';
+    tabEl.dataset.id = id;
+    tabEl.innerHTML = `<div class="label"></div><div class="close" title="Close tab" aria-label="Close tab">${closeSvg()}</div>`;
+    // append before add button
+    tabsBar.insertBefore(tabEl, tabAddBtn);
+
+    tabObj.element = tabEl;
+
+    // events
+    tabEl.addEventListener('click', (e)=>{
+      if (e.target.closest('.close')){ // clicked close
+        closeTab(id, true);
+        return;
+      }
+      activateTab(id);
+    });
+
+    // set label and active
+    renumberTabsDOM();
+    activateTab(id);
+    // set content if monaco ready
+    if (monacoIsReady && editor){
+      editor.setValue(initialContent || '');
+    }
+    return tabObj;
+  }
+
+  function activateTab(id){
+    if (activeTabId === id) return;
+    // deactivate existing
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    const tObj = tabs.find(x=>x.id===id);
+    if (!tObj) return;
+    if (tObj.element) tObj.element.classList.add('active');
+    activeTabId = id;
+    // load content into editor
+    if (monacoIsReady && editor){
+      editor.setValue(tObj.content || '');
+      editor.focus();
+    }
+  }
+
+  function closeTab(id, removeFromArray = true){
+    const idx = tabs.findIndex(t=>t.id===id);
+    if (idx === -1) return;
+    const tabObj = tabs[idx];
+    // animate fade-out
+    if (tabObj.element){
+      tabObj.element.style.animation = 'fadeOut .3s forwards';
+      setTimeout(()=> {
+        if (tabObj.element && tabObj.element.parentNode) tabObj.element.parentNode.removeChild(tabObj.element);
+      }, 300);
+    }
+    // remove
+    if (removeFromArray) tabs.splice(idx,1);
+    // if it was active, activate a neighbor
+    if (activeTabId === id){
+      if (tabs.length>0){
+        const next = tabs[Math.max(0, idx-1)];
+        setTimeout(()=> activateTab(next.id), 320);
+      } else {
+        // create a new empty tab automatically
+        setTimeout(()=> createTab(''), 320);
+      }
+    } else {
+      renumberTabsDOM();
+    }
+  }
+
+  tabAddBtn.addEventListener('click', ()=>{
+    // create new tab with number = current count + 1 (renumbering will set the labels)
+    createTab('');
+  });
+
+  // Close svg
+  function closeSvg(){ return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="m12 13.4l-4.9 4.9q-.275.275-.7.275t-.7-.275t-.275-.7t.275-.7l4.9-4.9l-4.9-4.9q-.275-.275-.275-.7t.275-.7t.7-.275t.7.275l4.9 4.9l4.9-4.9q.275-.275.7-.275t.7.275t.275.7t-.275.7L13.4 12l4.9 4.9q.275.275.275.7t-.275.7t-.7.275t-.7-.275z"/></svg>'; }
+
+  // Initialize with one tab
+  createTab('// Welcome to Minimal Monaco\n-- Lua script\n', null);
+
+  // ---------- Explorer: request / display files ----------
+  function renderFileList(files){
+    filesList.innerHTML = '';
+    if (!files || files.length===0){
+      const p = document.createElement('div'); p.style.color='rgba(255,255,255,0.45)'; p.textContent='No files found'; filesList.appendChild(p); return;
+    }
+    files.forEach(f=>{
+      const it = document.createElement('div');
+      it.className = 'file-item';
+      it.innerHTML = `<div class="name">${escapeHtml(f)}</div><div class="icon">${docSvg()}</div>`;
+      it.addEventListener('click', ()=> {
+        // ask host to open file content
+        postToHost({ command: 'openFile', payload: f });
+      });
+      filesList.appendChild(it);
+    });
+  }
+
+  // Refresh button -> request file list from host
+  btnRefresh.addEventListener('click', ()=>{
+    requestFileList();
+  });
+
+  function requestFileList(){
+    postToHost({ command:'requestFiles', payload: '' });
+  }
+
+  // ---------- Bridge from host to JS ----------
+  // Host should call window.openFileInEditor(content, filename) OR send via webview.postMessage with { type: 'fileContent', content:.., fileName:.. }
+  window.openFileInEditor = function(content, filename){
+    // Load into active tab and optionally rename that tab to the filename
+    const t = tabs.find(x=>x.id===activeTabId);
+    if (!t){
+      // create new tab then set
+      const newTab = createTab(content, filename);
+      newTab.content = content || '';
+      if (filename) { newTab.filename = filename; renumberTabsDOM(); }
+      activateTab(newTab.id);
+      return;
+    }
+    // set content & filename
+    t.content = content || '';
+    if (filename){
+      t.filename = filename;
+    }
+    // update DOM label
+    renumberTabsDOM();
+    if (monacoIsReady && editor){
+      editor.setValue(t.content);
+    }
+  };
+
+  // Also provide a convenience setter name used sometimes by C# (compat)
+  window.setEditorContentFromHost = function(content, filename){
+    window.openFileInEditor(content, filename);
+  };
+
+  // Listen to messages from host (WebView2)
+  if (window.chrome && window.chrome.webview && window.chrome.webview.addEventListener){
+    window.chrome.webview.addEventListener('message', (ev)=>{
+      try{
+        let data = ev.data;
+        if (typeof data === 'string'){
+          try { data = JSON.parse(data); } catch(e) { /* leave as string */ }
+        }
+        if (!data) return;
+        if (data.type === 'fileList' && Array.isArray(data.files)){
+          renderFileList(data.files);
+        } else if (data.type === 'fileContent'){
+          window.openFileInEditor(data.content || '', data.fileName || data.filename || null);
+        } else if (data.command === 'fileList' && Array.isArray(data.payload)){
+          renderFileList(data.payload);
+        } else if (data.command === 'sendFile'){
+          window.openFileInEditor(data.payload || '', data.name || null);
+        }
+      } catch(err){ console.error(err); }
+    });
+  } else {
+    // fallback for debugging in browser: listen to window messages
+    window.addEventListener('message', (ev)=>{
+      try{
+        const data = ev.data;
+        if (!data) return;
+        if (data.type === 'fileList') renderFileList(data.files || []);
+        if (data.type === 'fileContent') window.openFileInEditor(data.content || '', data.fileName || data.filename || null);
+      } catch(e){ console.error(e); }
+    });
+  }
+
+  // ---------- Monaco bootstrap ----------
+  require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.33.0/min/vs' }});
+  require(['vs/editor/editor.main'], function () {
+    // Define custom theme exactly as requested
+    monaco.editor.defineTheme('CustomTheme', {
+      base: 'vs-dark',
+      inherit: true,
+      rules: [
+        { token: '', foreground: 'E8EDF4' },
+        { token: 'delimiter', foreground: '808080' },
+        { token: 'operator', foreground: '569CD6' },
+        { token: 'keyword', foreground: '569CD6', fontStyle: 'bold' },
+        { token: 'function', foreground: '4EC9B0' },
+        { token: 'support.function', foreground: '4EC9B0' },
+        { token: 'string', foreground: '9CDCFE' },
+        { token: 'number', foreground: 'B5CEA8' },
+        { token: 'comment', foreground: '6A9955', fontStyle: 'italic' }
+      ],
+      colors: {
+        'editor.background': '#0B1118',
+        'editor.foreground': '#E8EDF4',
+        'editorLineNumber.foreground': '#334155',
+        'editorLineNumber.activeForeground': '#2F6FD6',
+        'editorIndentGuide.background': '#1E293B',
+        'editorCursor.foreground': '#2F6FD6',
+        'editorSuggestWidget.background': '#0F172A',
+        'scrollbarSlider.background': '#1E293B'
+      }
+    });
+
+    editor = monaco.editor.create(editorContainer, {
+      value: '',
+      language: 'lua',
+      theme: 'CustomTheme',
+      fontSize: 13,
+      fontFamily: "'Fira Code', monospace",
+      minimap: { enabled: true },
+      automaticLayout: true,
+      glyphMargin: true,
+      folding: true,
+      scrollBeyondLastLine: false,
+      lightbulb: { enabled: true }
+    });
+
+    // Basic autocomplete for Lua (IntelliSense)
+    monaco.languages.registerCompletionItemProvider('lua', {
+      provideCompletionItems: function(model, position) {
+        const suggestions = [
+          { label: 'print', kind: monaco.languages.CompletionItemKind.Function, insertText: 'print(${1:msg})', insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet, documentation: 'Prints to console.' },
+          { label: 'wait', kind: monaco.languages.CompletionItemKind.Function, insertText: 'wait(${1:seconds})', insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet, documentation: 'Yield for seconds.' },
+          { label: 'require', kind: monaco.languages.CompletionItemKind.Function, insertText: 'require("${1:module}")', insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet },
+          { label: 'pairs', kind: monaco.languages.CompletionItemKind.Function, insertText: 'pairs(${1:tbl})', insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet },
+          { label: 'ipairs', kind: monaco.languages.CompletionItemKind.Function, insertText: 'ipairs(${1:tbl})', insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet },
+          { label: 'tonumber', kind: monaco.languages.CompletionItemKind.Function, insertText: 'tonumber(${1:val})', insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet }
+        ];
+        return { suggestions: suggestions };
+      }
+    });
+
+    // Reflect editor content to currently active tab
+    editor.onDidChangeModelContent(()=>{
+      const t = tabs.find(x=>x.id===activeTabId);
+      if (t) t.content = editor.getValue();
+    });
+
+    monacoIsReady = true;
+
+    // If new tab created earlier, put its content in editor
+    const current = tabs.find(x=>x.id===activeTabId);
+    if (current && editor) editor.setValue(current.content || '');
+
+    // Request files from host at startup
+    requestFileList();
+  });
+
+  // Utility SVG (document)
+  function docSvg(){ return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M13 9V3.5L18.5 9M6 2c-1.11 0-2 .89-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/></svg>'; }
+
+  // Utility escape
+  function escapeHtml(s){ return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  // Expose a small API so host can set file list easily (alternate entry point)
+  window.updateFileList = function(files){
+    try { if (!Array.isArray(files)) files = []; renderFileList(files); } catch(e){ console.error(e); }
+  };
+
+  // Expose API for host to send file content (alternate)
+  window.sendFileContentToEditor = function(content, filename){
+    window.openFileInEditor(content, filename);
+  };
+
+  // Keyboard shortcuts (optional)
+  window.addEventListener('keydown', (e)=>{
+    const mac = navigator.platform.toUpperCase().indexOf('MAC')>=0;
+    if ((mac?e.metaKey:e.ctrlKey) && e.key.toLowerCase()==='s'){
+      e.preventDefault();
+      // Could send to host to save active tab content - but out of scope
+      console.log('Save requested (Ctrl/Cmd+S) - implement host save if needed.');
+    }
+  });
+
+  // Expose method to request files programmatically
+  window.requestFilesFromHost = requestFileList;
+
+})();
+</script>
+</body>
+</html>
