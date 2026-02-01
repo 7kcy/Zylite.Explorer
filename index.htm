@@ -220,6 +220,35 @@
       }
     }
   }
+  
+  function typeIntoEditor(text, speed = 22){
+  if (!editor || !monacoIsReady) return;
+
+  editor.setValue('');
+  editor.focus();
+
+  let i = 0;
+  let stopped = false;
+
+  const stop = () => stopped = true;
+  editor.onDidChangeModelContent(stop);
+  editor.onMouseDown(stop);
+
+  function tick(){
+    if (stopped || i >= text.length) return;
+    editor.executeEdits('', [{
+      range: editor.getModel().getFullModelRange(),
+      text: editor.getValue() + text[i],
+      forceMoveMarkers: true
+    }]);
+    i++;
+    setTimeout(tick, speed);
+  }
+
+  tick();
+}
+
+
 
   function createTab(initialContent = '', filename = null){
     const id = Date.now() + Math.floor(Math.random()*1000);
@@ -307,7 +336,7 @@
   function closeSvg(){ return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="m12 13.4l-4.9 4.9q-.275.275-.7.275t-.7-.275t-.275-.7t.275-.7l4.9-4.9l-4.9-4.9q-.275-.275-.275-.7t.275-.7t.7-.275t.7.275l4.9 4.9l4.9-4.9q.275-.275.7-.275t.7.275t.275.7t-.275.7L13.4 12l4.9 4.9q.275.275.275.7t-.275.7t-.7.275t-.7-.275z"/></svg>'; }
 
   // Initialize with one tab
-  createTab('// Welcome to Minimal Monaco\n-- Lua script\n', null);
+  createTab('// Welcome to Zylite\n print("Zylite on top")\n', null);
 
   // ---------- Explorer: request / display files ----------
   function renderFileList(files){
