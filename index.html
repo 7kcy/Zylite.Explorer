@@ -32,26 +32,17 @@
   ::-webkit-scrollbar-thumb:hover { background:var(--scrollbar-thumb-hover); }
   * { scrollbar-width:thin; scrollbar-color:var(--scrollbar-thumb) var(--scrollbar-bg); }
 
-  /* ─── Monaco #676aff nuclear kill ─── 
-     #676aff = Monaco's hardcoded hsl(220,100%,60%) fallback. It's NOT a blend
-     of user input — it's baked into Monaco's CSS for elements whose theme tokens
-     don't reach. Reverse-math'd input fed to tokens: #0098E2.
-     Everything else forced via !important on every selector that can show it. */
-
-  /* Tabs — color-corrected: #0098E2 input → renders as #0098E2 after display shift
-     (measured shift: +21.7° hue, +7.8% sat, +10.4% light) */
+  /* ─── Monaco #676aff nuclear kill ─── */
   .tab.active                { background:#0098E2 !important; border-color:#0098E2 !important; color:#fff !important; }
   .tab.active:hover          { background:#0098E2 !important; border-color:#0098E2 !important; }
   .tab:not(.active):hover    { background:rgba(0,152,226,0.12) !important; border-color:rgba(0,152,226,0.25) !important; color:#0098E2 !important; }
 
-  /* Suggest / autocomplete */
   .monaco-editor .suggest-widget .monaco-list .list-item.selected,
   .monaco-editor .suggest-widget .monaco-list .list-item.focused { background:rgba(0,152,226,0.2) !important; }
   .monaco-editor .suggest-widget .monaco-list .list-item.selected .label-name,
   .monaco-editor .suggest-widget .monaco-list .list-item.focused .label-name { color:#fff !important; }
   .monaco-editor .suggest-widget .detail-pane                   { border-left-color:#007AB5 !important; }
 
-  /* Find / replace widget */
   .monaco-editor .find-widget input:focus,
   .monaco-editor .find-widget textarea:focus                    { border-color:#007AB5 !important; box-shadow:0 0 0 1px #007AB5 !important; }
   .monaco-editor .find-widget .toggle.checked                   { background:rgba(0,152,226,0.25) !important; border-color:#0098E2 !important; color:#fff !important; }
@@ -63,61 +54,52 @@
   .monaco-editor .find-widget .input-group-input input:focus    { border-color:#007AB5 !important; }
   .monaco-editor .find-widget .find-input .input-group-buttons .action-container .action-item:hover { background:rgba(0,152,226,0.15) !important; }
 
-  /* Quick input (Ctrl+P, Ctrl+Shift+P) */
   .monaco-editor .quick-input-widget .quick-input-list .list-item.selected,
   .monaco-editor .quick-input-widget .quick-input-list .list-item.focused { background:rgba(0,152,226,0.2) !important; }
   .monaco-editor .quick-input-widget input:focus                { border-color:#007AB5 !important; box-shadow:0 0 0 1px #007AB5 !important; }
 
-  /* Action items (lightbulb menu, context menus, command palette) */
   .monaco-editor .action-item:hover                             { background:rgba(0,152,226,0.13) !important; }
   .monaco-editor .action-item.checked                           { color:#0098E2 !important; }
   .monaco-editor .action-item.checked .action-label             { color:#0098E2 !important; }
   .monaco-editor .action-item.separator                         { border-color:#1E293B !important; }
 
-  /* Breadcrumbs */
   .monaco-editor .breadcrumb-picker .focused-label .label-name  { color:#0098E2 !important; }
   .monaco-breadcrumb-item:hover                                 { color:#0098E2 !important; }
 
-  /* Minimap highlight / cursor */
   .monaco-editor .minimap-cursor-layer .cursorBlock             { background:rgba(0,152,226,0.5) !important; }
   .monaco-editor .minimap-cursor-layer .cursorPixel             { background:rgba(0,152,226,0.5) !important; }
 
-  /* Parameter hints */
   .monaco-editor .parameter-hints-widget .signature-help-pane .parameterInfo { color:#E8EDF4 !important; }
   .monaco-editor .parameter-hints-widget .signature .parameter.active        { color:#0098E2 !important; font-weight:600; }
 
-  /* Badges (e.g. "N more") */
   .monaco-editor .badge                                         { background:#007AB5 !important; color:#fff !important; }
   .monaco-editor .monaco-badge span                             { background:#007AB5 !important; color:#fff !important; }
 
-  /* Gutter / line actions (breakpoints, folding arrows on hover) */
   .monaco-editor .code-action-widget .list-item.selected .action-label,
   .monaco-editor .code-action-widget .list-item.focused .action-label { color:#fff !important; }
   .monaco-editor .code-action-widget .list-item.selected,
   .monaco-editor .code-action-widget .list-item.focused        { background:rgba(0,152,226,0.2) !important; }
   .monaco-editor .code-action-widget .lightbulb-action-button:hover { background:rgba(0,152,226,0.15) !important; }
 
-  /* Popover tooltips / hover info */
   .monaco-editor .hover-overlay-widget .markdown-hover .value  { color:#E8EDF4 !important; }
   .monaco-editor .hover-overlay-widget                         { border-color:#334155 !important; background:#0F172A !important; }
 
-  /* Scrollbars inside Monaco */
   .monaco-scrollable-element .scrollbar                        { background:#0F172A !important; }
   .monaco-scrollable-element .scrollbar .slider                { background:#1E293B !important; }
   .monaco-scrollable-element .scrollbar .slider:hover          { background:#334155 !important; }
 
   /* ─── Sidebar ─── */
   #sidebar {
-    width:240px; min-width:160px;
+    width:140px; min-width:140px; max-width:420px;
     background:var(--sidebar-bg);
     border-right:1px solid var(--sidebar-border);
     display:flex; flex-direction:column;
-    padding:12px; gap:10px;
+    padding:0; gap:10px;
     position:relative;
   }
-  .sidebar-header { display:flex; align-items:center; gap:8px; font-size:14px; font-weight:600; color:var(--text); }
+  .sidebar-header { display:flex; align-items:center; gap:8px; font-size:14px; font-weight:600; color:var(--text); padding:12px; }
   .sidebar-header svg { width:18px; height:18px; color:var(--text); flex-shrink:0; }
-  #file-actions { display:flex; gap:8px; align-items:center; margin-left:auto; }
+  #file-actions { display:flex; gap:8px; align-items:center; margin-left:auto; margin-right:8px; }
 
   .btn-icon {
     background:transparent; border:1px solid rgba(255,255,255,0.08);
@@ -130,10 +112,10 @@
   @keyframes spin { to { transform:rotate(360deg); } }
   .btn-icon svg { width:16px; height:16px; color:var(--text); }
 
-  .files-list { flex:1; overflow-y:auto; padding-right:4px; display:flex; flex-direction:column; gap:4px; margin-top:4px; }
+  .files-list { flex:1; overflow-y:auto; padding:0 12px 0 0; display:flex; flex-direction:column; gap:4px; margin-top:4px; }
   .file-item {
     display:flex; justify-content:space-between; align-items:center;
-    padding:8px; border-radius:6px; cursor:pointer; font-size:13px; color:var(--text);
+    padding:8px 8px 8px 12px; border-radius:6px; cursor:pointer; font-size:13px; color:var(--text);
     transition:background .16s, transform .16s;
   }
   .file-item:hover { background:rgba(255,255,255,0.05); transform:translateX(4px); }
@@ -143,7 +125,7 @@
   /* ─── Right panel ─── */
   #right { flex:1; display:flex; flex-direction:column; height:100vh; min-width:300px; overflow:hidden; }
 
-  /* ─── Tabs ─── */
+  /* ─── Tabs with drag support ─── */
   #tabs-bar {
     height:44px; display:flex; align-items:center; gap:4px;
     padding:6px 8px; background:transparent;
@@ -158,10 +140,18 @@
     border:1px solid transparent;
     background:rgba(255,255,255,0.03);
     color:rgba(232,237,244,0.55);
-    cursor:pointer; white-space:nowrap; flex-shrink:0;
+    cursor:grab; white-space:nowrap; flex-shrink:0;
     transition:background .15s, color .15s, border-color .15s;
     opacity:0; animation:fadeIn .25s forwards;
     user-select:none;
+    position:relative;
+  }
+  .tab.dragging {
+    opacity:0.5;
+    cursor:grabbing;
+  }
+  .tab.drag-over {
+    border-left:2px solid #0098E2;
   }
   .tab:not(.active):hover {
     background:rgba(0,152,226,0.12);
@@ -185,6 +175,22 @@
   .tab .close svg { width:13px; height:13px; color:currentColor; }
   .tab.active .close svg { color:rgba(255,255,255,0.7); }
 
+  /* Auto-save indicator */
+  .tab .save-indicator {
+    width:6px; height:6px; border-radius:50%;
+    background:#4ade80;
+    position:absolute; top:4px; right:4px;
+    opacity:0; transition:opacity .3s;
+  }
+  .tab .save-indicator.saving {
+    opacity:1;
+    animation:pulse 1s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity:0.4; }
+    50% { opacity:1; }
+  }
+
   @keyframes fadeIn  { from { opacity:0; transform:translateY(-4px); } to { opacity:1; transform:none; } }
   @keyframes fadeOut { from { opacity:1; transform:none; } to { opacity:0; transform:translateY(-4px); } }
 
@@ -202,12 +208,12 @@
 
   /* ─── Sidebar resizer ─── */
   #sidebar-resizer {
-    position:absolute; top:0; right:-3px; width:6px; height:100%;
+    position:absolute; top:0; right:0; width:6px; height:100%;
     cursor:col-resize; background:transparent; z-index:10; transition:background .15s;
   }
   #sidebar-resizer:hover { background:rgba(0,122,181,0.3); }
 
-  @media (max-width:800px){ #sidebar{ width:180px; } }
+  @media (max-width:800px){ #sidebar{ width:140px; } }
 
   /* ══════════════════════════════════════
      CONTEXT MENU
@@ -260,7 +266,6 @@
     box-shadow:0 4px 18px rgba(0,0,0,0.4);
     color:var(--text); font-size:13px; white-space:nowrap;
     pointer-events:auto;
-    /* entrance */
     opacity:0; transform:translateX(60px) scale(.96);
     transition:opacity .28s cubic-bezier(.4,0,.2,1), transform .28s cubic-bezier(.4,0,.2,1);
   }
@@ -272,20 +277,20 @@
   .toast.add   .toast-icon { background:rgba(0,152,226,0.2); } .toast.add   .toast-icon svg { color:#0098E2; }
   .toast.del   .toast-icon { background:rgba(239,68,68,0.2); } .toast.del   .toast-icon svg { color:#ef4444; }
   .toast.rename .toast-icon { background:rgba(74,222,128,0.2); } .toast.rename .toast-icon svg { color:#4ade80; }
+  .toast.save   .toast-icon { background:rgba(74,222,128,0.2); } .toast.save   .toast-icon svg { color:#4ade80; }
 
   .toast-text .toast-label { font-weight:600; color:#fff; }
 
-  /* progress bar under toast */
   .toast-bar { position:absolute; bottom:0; left:0; height:2px; border-radius:0 0 10px 10px; width:100%; overflow:hidden; }
   .toast-bar-fill { height:100%; width:100%; border-radius:2px; animation:shrink var(--dur,2s) linear forwards; }
   .toast.add    .toast-bar-fill { background:var(--accent-hover); }
   .toast.del    .toast-bar-fill { background:#ef4444; }
   .toast.rename .toast-bar-fill { background:#4ade80; }
+  .toast.save   .toast-bar-fill { background:#4ade80; }
   @keyframes shrink { from { width:100%; } to { width:0%; } }
   .toast { position:relative; overflow:hidden; }
 
-  /* hint text */
-  .sidebar-hint { font-size:12px; color:rgba(255,255,255,0.4); padding-top:4px; line-height:1.5; }
+  .sidebar-hint { font-size:12px; color:rgba(255,255,255,0.4); padding:4px 12px 12px 12px; line-height:1.5; }
   .sidebar-hint span { opacity:.7; }
 </style>
 </head>
@@ -306,7 +311,7 @@
       </div>
     </div>
     <div class="files-list" id="files-list" aria-live="polite"></div>
-    <div class="sidebar-hint">Click a file to load it.<br><span>Right-click a tab to rename.</span></div>
+    <div class="sidebar-hint">Auto-saves enabled • Drag tabs to reorder<br><span>Right-click tab to rename</span></div>
     <div id="sidebar-resizer" aria-hidden="true"></div>
   </aside>
 
@@ -343,7 +348,9 @@
   let activeTabId = null;
   let editor = null;
   let monacoIsReady = false;
-  let ctxTargetTabId = null; // which tab the context menu was opened on
+  let ctxTargetTabId = null;
+  let autoSaveTimer = null;
+  let draggedTab = null;
 
   /* ─── DOM ─── */
   const tabsBar         = document.getElementById('tabs-bar');
@@ -356,13 +363,87 @@
   const ctxCancel       = document.getElementById('ctx-cancel');
   const toastContainer  = document.getElementById('toast-container');
 
+  /* ═══════════════════ AUTO-SAVE ═══════════════════ */
+  function scheduleAutoSave(){
+    if(autoSaveTimer) clearTimeout(autoSaveTimer);
+    autoSaveTimer = setTimeout(()=>{
+      saveAllTabs();
+    }, 2000); // Auto-save after 2 seconds of inactivity
+  }
+
+  function saveAllTabs(){
+    const activeTab = tabs.find(t=> t.id === activeTabId);
+    if(!activeTab) return;
+    
+    // Save to localStorage
+    const saveData = tabs.map(t=>({
+      id: t.id,
+      name: t.name,
+      content: t.content,
+      filename: t.filename
+    }));
+    
+    try{
+      localStorage.setItem('zylite_tabs', JSON.stringify(saveData));
+      localStorage.setItem('zylite_active_tab', activeTabId);
+      
+      // Show save indicator briefly
+      if(activeTab.element){
+        const indicator = activeTab.element.querySelector('.save-indicator');
+        if(indicator){
+          indicator.classList.add('saving');
+          setTimeout(()=> indicator.classList.remove('saving'), 1500);
+        }
+      }
+      
+      console.log('Auto-saved', saveData.length, 'tabs');
+    } catch(e){
+      console.error('Save failed:', e);
+    }
+  }
+
+  function loadSavedTabs(){
+    try{
+      const saved = localStorage.getItem('zylite_tabs');
+      const activeId = localStorage.getItem('zylite_active_tab');
+      
+      if(saved){
+        const data = JSON.parse(saved);
+        if(Array.isArray(data) && data.length > 0){
+          // Clear initial tab
+          tabs.length = 0;
+          document.querySelectorAll('.tab').forEach(t=> t.remove());
+          
+          // Restore saved tabs
+          data.forEach(tabData=>{
+            createTab(tabData.content || '', tabData.filename, tabData.id, true);
+          });
+          
+          // Restore active tab
+          if(activeId){
+            const targetTab = tabs.find(t=> t.id == activeId);
+            if(targetTab) activateTab(targetTab.id);
+          } else if(tabs.length > 0){
+            activateTab(tabs[0].id);
+          }
+          
+          showToast('save', 'Session restored');
+          return true;
+        }
+      }
+    } catch(e){
+      console.error('Load failed:', e);
+    }
+    return false;
+  }
+
   /* ═══════════════════ TOAST ═══════════════════ */
   function showToast(type, message, dur = 2200){
-    // type: 'add' | 'del' | 'rename'
     const icons = {
       add:    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>',
       del:    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>',
-      rename: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>'
+      rename: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>',
+      save:   '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>'
     };
     const t = document.createElement('div');
     t.className = `toast ${type}`;
@@ -372,9 +453,7 @@
       <div class="toast-text"><span class="toast-label">${message}</span></div>
       <div class="toast-bar"><div class="toast-bar-fill"></div></div>`;
     toastContainer.appendChild(t);
-    // trigger entrance next frame
     requestAnimationFrame(()=> requestAnimationFrame(()=> t.classList.add('show')));
-    // exit
     setTimeout(()=>{
       t.classList.remove('show');
       t.classList.add('hide');
@@ -393,7 +472,7 @@
   ctxRename.addEventListener('click', (e)=>{
     e.stopPropagation();
     e.stopImmediatePropagation();
-    const targetId = ctxTargetTabId; // snapshot BEFORE hide nukes it
+    const targetId = ctxTargetTabId;
     hideCtxMenu();
     if (targetId === null) return;
     const t = tabs.find(x=> x.id === targetId);
@@ -434,8 +513,8 @@
     return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="m12 13.4l-4.9 4.9q-.275.275-.7.275t-.7-.275t-.275-.7t.275-.7l4.9-4.9l-4.9-4.9q-.275-.275-.275-.7t.275-.7t.7-.275t.7.275l4.9 4.9l4.9-4.9q.275-.275.7-.275t.7.275t.275.7t-.275.7L13.4 12l4.9 4.9q.275.275.275.7t-.275.7t-.7.275t-.7-.275z"/></svg>';
   }
 
-  function createTab(initialContent='', filename=null){
-    const id = Date.now() + Math.floor(Math.random()*1000);
+  function createTab(initialContent='', filename=null, forceId=null, skipToast=false){
+    const id = forceId || (Date.now() + Math.floor(Math.random()*1000));
     const tabObj = { id, name:null, content:initialContent, element:null, filename:filename||null };
     tabs.push(tabObj);
     renumberTabsDOM();
@@ -443,7 +522,8 @@
     const tabEl = document.createElement('div');
     tabEl.className = 'tab';
     tabEl.dataset.id = id;
-    tabEl.innerHTML  = `<div class="label"></div><div class="close" title="Close" aria-label="Close tab">${closeSvg()}</div>`;
+    tabEl.draggable = true;
+    tabEl.innerHTML  = `<div class="label"></div><div class="save-indicator"></div><div class="close" title="Close" aria-label="Close tab">${closeSvg()}</div>`;
     tabsBar.insertBefore(tabEl, tabAddBtn);
     tabObj.element = tabEl;
 
@@ -465,11 +545,61 @@
       requestAnimationFrame(()=> ctxMenu.classList.add('visible'));
     });
 
+    /* ─── DRAG AND DROP ─── */
+    tabEl.addEventListener('dragstart', (e)=>{
+      draggedTab = tabObj;
+      tabEl.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/html', tabEl.innerHTML);
+    });
+
+    tabEl.addEventListener('dragend', ()=>{
+      tabEl.classList.remove('dragging');
+      document.querySelectorAll('.tab').forEach(t=> t.classList.remove('drag-over'));
+      draggedTab = null;
+    });
+
+    tabEl.addEventListener('dragover', (e)=>{
+      if(!draggedTab || draggedTab.id === tabObj.id) return;
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      
+      const rect = tabEl.getBoundingClientRect();
+      const midpoint = rect.left + rect.width / 2;
+      
+      document.querySelectorAll('.tab').forEach(t=> t.classList.remove('drag-over'));
+      tabEl.classList.add('drag-over');
+    });
+
+    tabEl.addEventListener('drop', (e)=>{
+      e.preventDefault();
+      if(!draggedTab || draggedTab.id === tabObj.id) return;
+      
+      const draggedIdx = tabs.findIndex(t=> t.id === draggedTab.id);
+      const targetIdx = tabs.findIndex(t=> t.id === tabObj.id);
+      
+      if(draggedIdx !== -1 && targetIdx !== -1){
+        // Reorder tabs array
+        tabs.splice(draggedIdx, 1);
+        const newTargetIdx = tabs.findIndex(t=> t.id === tabObj.id);
+        tabs.splice(newTargetIdx, 0, draggedTab);
+        
+        // Reorder DOM
+        const allTabs = Array.from(tabsBar.querySelectorAll('.tab'));
+        allTabs.forEach(t=> t.remove());
+        tabs.forEach(t=> tabsBar.insertBefore(t.element, tabAddBtn));
+        
+        scheduleAutoSave();
+      }
+      
+      document.querySelectorAll('.tab').forEach(t=> t.classList.remove('drag-over'));
+    });
+
     renumberTabsDOM();
     activateTab(id);
     if (monacoIsReady && editor) editor.setValue(initialContent||'');
 
-    showToast('add', `Created "${tabObj.name}"`);
+    if(!skipToast) showToast('add', `Created "${tabObj.name}"`);
     return tabObj;
   }
 
@@ -498,6 +628,7 @@
         tabObj.filename = val;
         tabObj.name     = val;
         showToast('rename', `Renamed to "${val}"`);
+        scheduleAutoSave();
       }
       renumberTabsDOM();
     }
@@ -516,7 +647,11 @@
     if (!tObj) return;
     if (tObj.element) tObj.element.classList.add('active');
     activeTabId = id;
-    if (monacoIsReady && editor){ editor.setValue(tObj.content||''); editor.focus(); }
+    if (monacoIsReady && editor){ 
+      editor.setValue(tObj.content||''); 
+      editor.focus(); 
+    }
+    scheduleAutoSave();
   }
 
   function closeTab(id, removeFromArray=true){
@@ -532,6 +667,7 @@
     if (removeFromArray) tabs.splice(idx,1);
 
     showToast('del', `Closed "${wasName}"`);
+    scheduleAutoSave();
 
     if (activeTabId===id){
       if (tabs.length>0){
@@ -544,27 +680,15 @@
 
   tabAddBtn.addEventListener('click', ()=> createTab(''));
 
-  /* ─── Initial tab (no toast for this one) ─── */
-  (function(){
-    // create silently — we pop the toast manually after so it says "Welcome"
-    const id = Date.now();
-    const tabObj = { id, name:'Script 1', content:'-- Welcome to Zylite\nprint("Zylite on top")\n', element:null, filename:null };
-    tabs.push(tabObj);
-    const tabEl = document.createElement('div');
-    tabEl.className='tab active'; tabEl.dataset.id=id;
-    tabEl.innerHTML=`<div class="label">Script 1</div><div class="close" title="Close" aria-label="Close tab">${closeSvg()}</div>`;
-    tabsBar.insertBefore(tabEl, tabAddBtn);
-    tabObj.element = tabEl;
-    activeTabId = id;
-    tabEl.addEventListener('click',(e)=>{ if(e.target.closest('.close')){closeTab(id,true);return;} activateTab(id); });
-    tabEl.addEventListener('contextmenu',(e)=>{ e.preventDefault(); e.stopPropagation(); ctxMenu.classList.remove('visible'); ctxTargetTabId=id; const r=tabEl.getBoundingClientRect(); ctxMenu.style.left=r.left+'px'; ctxMenu.style.top=r.bottom+4+'px'; requestAnimationFrame(()=>ctxMenu.classList.add('visible')); });
-  })();
-
   /* ═══════════════════ EXPLORER ═══════════════════ */
   function renderFileList(files){
     filesList.innerHTML='';
     if(!files||files.length===0){
-      const p=document.createElement('div'); p.style.cssText='color:rgba(255,255,255,0.3);font-size:13px;'; p.textContent='No files found'; filesList.appendChild(p); return;
+      const p=document.createElement('div'); 
+      p.style.cssText='color:rgba(255,255,255,0.3);font-size:13px;padding:8px;'; 
+      p.textContent='No files found'; 
+      filesList.appendChild(p); 
+      return;
     }
     files.forEach(f=>{
       const it=document.createElement('div'); it.className='file-item';
@@ -578,11 +702,21 @@
   /* ═══════════════════ HOST→JS BRIDGE ═══════════════════ */
   window.openFileInEditor = function(content, filename){
     const t = tabs.find(x=> x.id===activeTabId);
-    if(!t){ const nt=createTab(content,filename); nt.content=content||''; if(filename){nt.filename=filename;renumberTabsDOM();} activateTab(nt.id); return; }
+    if(!t){ 
+      const nt=createTab(content,filename); 
+      nt.content=content||''; 
+      if(filename){
+        nt.filename=filename;
+        renumberTabsDOM();
+      } 
+      activateTab(nt.id); 
+      return; 
+    }
     t.content=content||'';
     if(filename) t.filename=filename;
     renumberTabsDOM();
     if(monacoIsReady && editor) editor.setValue(t.content);
+    scheduleAutoSave();
   };
   window.setEditorContentFromHost = function(c,f){ window.openFileInEditor(c,f); };
 
@@ -600,7 +734,12 @@
     });
   } else {
     window.addEventListener('message',(ev)=>{
-      try{ const d=ev.data; if(!d)return; if(d.type==='fileList')renderFileList(d.files||[]); if(d.type==='fileContent')window.openFileInEditor(d.content||'',d.fileName||d.filename||null); }catch(e){console.error(e);}
+      try{ 
+        const d=ev.data; 
+        if(!d)return; 
+        if(d.type==='fileList')renderFileList(d.files||[]); 
+        if(d.type==='fileContent')window.openFileInEditor(d.content||'',d.fileName||d.filename||null); 
+      }catch(e){console.error(e);}
     });
   }
 
@@ -633,7 +772,6 @@
         'scrollbarSlider.background':'#1E293B',
         'scrollbarSlider.hoverBackground':'#334155',
         'scrollbarSlider.activeBackground':'#475569',
-        /* ── reverse-math'd inputs: feed #0098E2 so Monaco blending → #0098E2 ── */
         'button.background':'#0098E2',
         'button.hoverBackground':'#0098E2',
         'button.foreground':'#FFFFFF',
@@ -680,12 +818,86 @@
 
     editor.onDidChangeModelContent(()=>{
       const t=tabs.find(x=> x.id===activeTabId);
-      if(t) t.content=editor.getValue();
+      if(t){
+        t.content=editor.getValue();
+        scheduleAutoSave();
+      }
     });
 
     monacoIsReady = true;
+    
+    // Try to load saved session
+    const restored = loadSavedTabs();
+    
+    if(!restored){
+      // Create initial tab if nothing was restored
+      const id = Date.now();
+      const tabObj = { id, name:'Script 1', content:'-- Welcome to Zylite\nprint("Zylite on top")\n', element:null, filename:null };
+      tabs.push(tabObj);
+      const tabEl = document.createElement('div');
+      tabEl.className='tab active'; 
+      tabEl.dataset.id=id;
+      tabEl.draggable=true;
+      tabEl.innerHTML=`<div class="label">Script 1</div><div class="save-indicator"></div><div class="close" title="Close" aria-label="Close tab">${closeSvg()}</div>`;
+      tabsBar.insertBefore(tabEl, tabAddBtn);
+      tabObj.element = tabEl;
+      activeTabId = id;
+      
+      // Add event listeners for initial tab
+      tabEl.addEventListener('click',(e)=>{ 
+        if(e.target.closest('.close')){closeTab(id,true);return;} 
+        activateTab(id); 
+      });
+      tabEl.addEventListener('contextmenu',(e)=>{ 
+        e.preventDefault(); 
+        e.stopPropagation(); 
+        ctxMenu.classList.remove('visible'); 
+        ctxTargetTabId=id; 
+        const r=tabEl.getBoundingClientRect(); 
+        ctxMenu.style.left=r.left+'px'; 
+        ctxMenu.style.top=r.bottom+4+'px'; 
+        requestAnimationFrame(()=>ctxMenu.classList.add('visible')); 
+      });
+      
+      // Add drag listeners to initial tab
+      tabEl.addEventListener('dragstart', (e)=>{
+        draggedTab = tabObj;
+        tabEl.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+      });
+      tabEl.addEventListener('dragend', ()=>{
+        tabEl.classList.remove('dragging');
+        document.querySelectorAll('.tab').forEach(t=> t.classList.remove('drag-over'));
+        draggedTab = null;
+      });
+      tabEl.addEventListener('dragover', (e)=>{
+        if(!draggedTab || draggedTab.id === tabObj.id) return;
+        e.preventDefault();
+        tabEl.classList.add('drag-over');
+      });
+      tabEl.addEventListener('drop', (e)=>{
+        e.preventDefault();
+        if(!draggedTab || draggedTab.id === tabObj.id) return;
+        const draggedIdx = tabs.findIndex(t=> t.id === draggedTab.id);
+        const targetIdx = tabs.findIndex(t=> t.id === tabObj.id);
+        if(draggedIdx !== -1 && targetIdx !== -1){
+          tabs.splice(draggedIdx, 1);
+          const newTargetIdx = tabs.findIndex(t=> t.id === tabObj.id);
+          tabs.splice(newTargetIdx, 0, draggedTab);
+          const allTabs = Array.from(tabsBar.querySelectorAll('.tab'));
+          allTabs.forEach(t=> t.remove());
+          tabs.forEach(t=> tabsBar.insertBefore(t.element, tabAddBtn));
+          scheduleAutoSave();
+        }
+        document.querySelectorAll('.tab').forEach(t=> t.classList.remove('drag-over'));
+      });
+      
+      editor.setValue(tabObj.content);
+    }
+    
     const current = tabs.find(x=> x.id===activeTabId);
     if(current) editor.setValue(current.content||'');
+    
     requestFileList();
   });
 
@@ -696,10 +908,14 @@
   window.sendFileContentToEditor = function(c,f){window.openFileInEditor(c,f);};
   window.requestFilesFromHost    = requestFileList;
 
-  /* Ctrl/Cmd+S */
+  /* Ctrl/Cmd+S - Manual save */
   window.addEventListener('keydown',(e)=>{
     const mac=navigator.platform.toUpperCase().indexOf('MAC')>=0;
-    if((mac?e.metaKey:e.ctrlKey)&&e.key.toLowerCase()==='s'){ e.preventDefault(); console.log('Save requested.'); }
+    if((mac?e.metaKey:e.ctrlKey)&&e.key.toLowerCase()==='s'){ 
+      e.preventDefault(); 
+      saveAllTabs();
+      showToast('save', 'Saved manually');
+    }
   });
 
   /* ─── Sidebar resize ─── */
@@ -707,10 +923,29 @@
     const sidebar=document.getElementById('sidebar');
     const resizer=document.getElementById('sidebar-resizer');
     let dragging=false;
-    resizer.addEventListener('mousedown',(e)=>{ e.preventDefault(); dragging=true; document.body.style.cursor='col-resize'; document.body.style.userSelect='none'; });
-    window.addEventListener('mousemove',(e)=>{ if(!dragging)return; sidebar.style.width=Math.min(420,Math.max(140,e.clientX))+'px'; });
-    window.addEventListener('mouseup',()=>{ if(!dragging)return; dragging=false; document.body.style.cursor=''; document.body.style.userSelect=''; });
+    resizer.addEventListener('mousedown',(e)=>{ 
+      e.preventDefault(); 
+      dragging=true; 
+      document.body.style.cursor='col-resize'; 
+      document.body.style.userSelect='none'; 
+    });
+    window.addEventListener('mousemove',(e)=>{ 
+      if(!dragging)return; 
+      const newWidth = Math.min(420,Math.max(140,e.clientX));
+      sidebar.style.width = newWidth+'px'; 
+    });
+    window.addEventListener('mouseup',()=>{ 
+      if(!dragging)return; 
+      dragging=false; 
+      document.body.style.cursor=''; 
+      document.body.style.userSelect=''; 
+    });
   })();
+
+  /* Auto-save on page unload */
+  window.addEventListener('beforeunload', ()=>{
+    saveAllTabs();
+  });
 
 })();
 </script>
