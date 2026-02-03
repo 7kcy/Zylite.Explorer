@@ -11,7 +11,7 @@
 <style>
   :root{
     --bg: #0B1118;
-    --sidebar-bg: #070B10;
+    --sidebar-bg: #0B1118;
     --sidebar-border: #3A3A3A;
     --tab-active: #3A82F7;
     --tab-inactive: #0B1118;
@@ -131,6 +131,26 @@
   @media (max-width:800px){
     #sidebar{ width:180px; }
   }
+  
+  /* Sidebar resizer */
+#sidebar {
+  position: relative;
+}
+
+#sidebar-resizer {
+  position: absolute;
+  top: 0;
+  right: -3px;
+  width: 6px;
+  height: 100%;
+  cursor: col-resize;
+  background: transparent;
+}
+
+#sidebar-resizer:hover {
+  background: rgba(47, 111, 214, 0.25);
+}
+
 </style>
 </head>
 <body>
@@ -149,6 +169,8 @@
 
     <div class="files-list" id="files-list" aria-live="polite"></div>
     <div style="font-size:12px;color:rgba(255,255,255,0.55);padding-top:8px;">Click a file to load it into the active tab.</div>
+    <div id="sidebar-resizer" aria-hidden="true"></div>
+
   </aside>
 
   <div id="right">
@@ -530,6 +552,40 @@
 
   // Expose method to request files programmatically
   window.requestFilesFromHost = requestFileList;
+// ---------- Sidebar resize ----------
+(function(){
+  const sidebar = document.getElementById('sidebar');
+  const resizer = document.getElementById('sidebar-resizer');
+
+  let isResizing = false;
+
+  resizer.addEventListener('mousedown', (e) => {
+    isResizing = true;
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+  });
+
+  window.addEventListener('mousemove', (e) => {
+    if (!isResizing) return;
+
+    const minWidth = 140;
+    const maxWidth = 420;
+
+    const newWidth = Math.min(
+      maxWidth,
+      Math.max(minWidth, e.clientX)
+    );
+
+    sidebar.style.width = newWidth + 'px';
+  });
+
+  window.addEventListener('mouseup', () => {
+    if (!isResizing) return;
+    isResizing = false;
+    document.body.style.cursor = '';
+    document.body.style.userSelect = '';
+  });
+})();
 
 })();
 </script>
