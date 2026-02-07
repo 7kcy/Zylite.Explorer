@@ -3,7 +3,8 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Zylite Explorerr</title>
+<title>Zylite Explorer</title>
+<link rel="icon" type="image/png" href="Zylite_png.png" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.33.0/min/vs/loader.min.js"></script>
 
 <style>
@@ -120,7 +121,12 @@
   }
   .file-item:hover { background:rgba(255,255,255,0.05); transform:translateX(4px); }
   .file-item .name { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1; margin-right:8px; }
-  .file-item svg { width:18px; height:18px; opacity:.85; flex-shrink:0; }
+  .file-item .file-icon { width:18px; height:18px; opacity:.85; flex-shrink:0; margin-right:8px; }
+  .file-item .remove-file {
+    width:16px; height:16px; opacity:.4; flex-shrink:0; cursor:pointer;
+    transition:opacity .15s, color .15s;
+  }
+  .file-item .remove-file:hover { opacity:1; color:#ff4444; }
 
   /* ─── Right panel ─── */
   #right { flex:1; display:flex; flex-direction:column; height:100vh; min-width:300px; overflow:hidden; }
@@ -292,6 +298,41 @@
 
   .sidebar-hint { font-size:12px; color:rgba(255,255,255,0.4); padding:4px 12px 12px 12px; line-height:1.5; }
   .sidebar-hint span { opacity:.7; }
+
+  /* ─── Sidebar Footer Buttons ─── */
+  .sidebar-footer {
+    display:flex;
+    gap:8px;
+    padding:12px;
+    border-top:1px solid rgba(255,255,255,0.06);
+    background:rgba(0,0,0,0.1);
+  }
+  .btn-footer {
+    flex:1;
+    background:rgba(255,255,255,0.04);
+    border:1px solid rgba(255,255,255,0.08);
+    color:var(--text);
+    height:38px;
+    border-radius:6px;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition:background .15s, border-color .15s, transform .1s;
+  }
+  .btn-footer:hover {
+    background:rgba(0,152,226,0.12);
+    border-color:rgba(0,152,226,0.3);
+    transform:translateY(-1px);
+  }
+  .btn-footer:active {
+    transform:translateY(0);
+  }
+  .btn-footer svg {
+    width:18px;
+    height:18px;
+    color:var(--text);
+  }
 </style>
 </head>
 <body>
@@ -311,7 +352,22 @@
       </div>
     </div>
     <div class="files-list" id="files-list" aria-live="polite"></div>
-    <div class="sidebar-hint">Auto-saves enabled • Drag tabs to reorder<br><span>Right-click tab to rename</span></div>
+    <div class="sidebar-footer">
+      <button class="btn-footer" id="btn-open" title="Open Script File">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/>
+          <line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+      </button>
+      <button class="btn-footer" id="btn-save" title="Save Script to File">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+          <polyline points="17 21 17 13 7 13 7 21"/>
+          <polyline points="7 3 7 8 15 8"/>
+        </svg>
+      </button>
+    </div>
     <div id="sidebar-resizer" aria-hidden="true"></div>
   </aside>
 
@@ -387,6 +443,14 @@
       localStorage.setItem('zylite_tabs', JSON.stringify(saveData));
       localStorage.setItem('zylite_active_tab', activeTabId);
       
+      // Save loaded files list separately
+      const loadedFiles = tabs.filter(t=> t.filename).map(t=>({
+        id: t.id,
+        filename: t.filename,
+        name: t.name
+      }));
+      localStorage.setItem('zylite_loaded_files', JSON.stringify(loadedFiles));
+      
       // Show save indicator briefly
       if(activeTab.element){
         const indicator = activeTab.element.querySelector('.save-indicator');
@@ -427,6 +491,15 @@
             activateTab(tabs[0].id);
           }
           
+          // Restore loaded files list
+          const loadedFilesData = localStorage.getItem('zylite_loaded_files');
+          if(loadedFilesData){
+            const loadedFiles = JSON.parse(loadedFilesData);
+            loadedFiles.forEach(file=>{
+              addFileToList(file.id, file.filename);
+            });
+          }
+          
           showToast('save', 'Session restored');
           return true;
         }
@@ -436,6 +509,44 @@
     }
     return false;
   }
+  
+  /* ═══════════════════ LOADED FILES LIST ═══════════════════ */
+  function addFileToList(tabId, filename){
+    // Check if already exists
+    const existing = filesList.querySelector(`[data-tab-id="${tabId}"]`);
+    if(existing) return;
+    
+    const fileItem = document.createElement('div');
+    fileItem.className = 'file-item';
+    fileItem.dataset.tabId = tabId;
+    fileItem.innerHTML = `
+      <div class="name">${escapeHtml(filename)}</div>
+      <svg class="file-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M13 9V3.5L18.5 9M6 2c-1.11 0-2 .89-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/></svg>
+      <svg class="remove-file" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    `;
+    
+    // Click on name/icon to activate tab
+    const nameEl = fileItem.querySelector('.name');
+    const iconEl = fileItem.querySelector('.file-icon');
+    const clickHandler = ()=> activateTab(tabId);
+    nameEl.addEventListener('click', clickHandler);
+    iconEl.addEventListener('click', clickHandler);
+    
+    // Click on X to remove from list (and close tab)
+    const removeBtn = fileItem.querySelector('.remove-file');
+    removeBtn.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      fileItem.remove();
+      closeTab(tabId, true);
+    });
+    
+    filesList.appendChild(fileItem);
+  }
+  
+  function removeFileFromList(tabId){
+    const fileItem = filesList.querySelector(`[data-tab-id="${tabId}"]`);
+    if(fileItem) fileItem.remove();
+  }
 
   /* ═══════════════════ TOAST ═══════════════════ */
   function showToast(type, message, dur = 2200){
@@ -443,13 +554,15 @@
       add:    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>',
       del:    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>',
       rename: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>',
-      save:   '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>'
+      save:   '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>',
+      open:   '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>',
+      error:  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>'
     };
     const t = document.createElement('div');
     t.className = `toast ${type}`;
     t.style.setProperty('--dur', dur + 'ms');
     t.innerHTML = `
-      <div class="toast-icon">${icons[type]}</div>
+      <div class="toast-icon">${icons[type] || icons.save}</div>
       <div class="toast-text"><span class="toast-label">${message}</span></div>
       <div class="toast-bar"><div class="toast-bar-fill"></div></div>`;
     toastContainer.appendChild(t);
@@ -665,6 +778,11 @@
       setTimeout(()=>{ if(tabObj.element && tabObj.element.parentNode) tabObj.element.parentNode.removeChild(tabObj.element); }, 220);
     }
     if (removeFromArray) tabs.splice(idx,1);
+    
+    // Remove from file list if it was a loaded file
+    if(tabObj.filename){
+      removeFileFromList(id);
+    }
 
     showToast('del', `Closed "${wasName}"`);
     scheduleAutoSave();
@@ -945,6 +1063,130 @@
   /* Auto-save on page unload */
   window.addEventListener('beforeunload', ()=>{
     saveAllTabs();
+  });
+
+  /* ─── Open Script File ─── */
+  document.getElementById('btn-open').addEventListener('click', ()=>{
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.lua,.txt';
+    input.onchange = (e)=>{
+      const file = e.target.files[0];
+      if(!file) return;
+      
+      const reader = new FileReader();
+      reader.onload = (event)=>{
+        const content = event.target.result;
+        const filename = file.name;
+        
+        // Create new tab with loaded content
+        const id = Date.now();
+        const tabObj = {
+          id,
+          name: filename.replace(/\.[^/.]+$/, ''), // Remove extension
+          content: content,
+          element: null,
+          filename: filename
+        };
+        tabs.push(tabObj);
+        
+        const tabEl = document.createElement('div');
+        tabEl.className = 'tab';
+        tabEl.dataset.id = id;
+        tabEl.draggable = true;
+        tabEl.innerHTML = `<div class="label">${escapeHtml(tabObj.name)}</div><div class="save-indicator"></div><div class="close" title="Close" aria-label="Close tab">${closeSvg()}</div>`;
+        tabsBar.insertBefore(tabEl, tabAddBtn);
+        tabObj.element = tabEl;
+        
+        // Add event listeners
+        tabEl.addEventListener('click', (e)=>{
+          if(e.target.closest('.close')){
+            closeTab(id, true);
+            return;
+          }
+          activateTab(id);
+        });
+        tabEl.addEventListener('contextmenu', (e)=>{
+          e.preventDefault();
+          e.stopPropagation();
+          ctxMenu.classList.remove('visible');
+          ctxTargetTabId = id;
+          const r = tabEl.getBoundingClientRect();
+          ctxMenu.style.left = r.left + 'px';
+          ctxMenu.style.top = r.bottom + 4 + 'px';
+          requestAnimationFrame(()=> ctxMenu.classList.add('visible'));
+        });
+        
+        // Add drag listeners
+        tabEl.addEventListener('dragstart', (e)=>{
+          draggedTab = tabObj;
+          tabEl.classList.add('dragging');
+          e.dataTransfer.effectAllowed = 'move';
+        });
+        tabEl.addEventListener('dragend', ()=>{
+          tabEl.classList.remove('dragging');
+          document.querySelectorAll('.tab').forEach(t=> t.classList.remove('drag-over'));
+          draggedTab = null;
+        });
+        tabEl.addEventListener('dragover', (e)=>{
+          if(!draggedTab || draggedTab.id === tabObj.id) return;
+          e.preventDefault();
+          tabEl.classList.add('drag-over');
+        });
+        tabEl.addEventListener('drop', (e)=>{
+          e.preventDefault();
+          if(!draggedTab || draggedTab.id === tabObj.id) return;
+          const draggedIdx = tabs.findIndex(t=> t.id === draggedTab.id);
+          const targetIdx = tabs.findIndex(t=> t.id === tabObj.id);
+          if(draggedIdx !== -1 && targetIdx !== -1){
+            tabs.splice(draggedIdx, 1);
+            const newTargetIdx = tabs.findIndex(t=> t.id === tabObj.id);
+            tabs.splice(newTargetIdx, 0, draggedTab);
+            const allTabs = Array.from(tabsBar.querySelectorAll('.tab'));
+            allTabs.forEach(t=> t.remove());
+            tabs.forEach(t=> tabsBar.insertBefore(t.element, tabAddBtn));
+            scheduleAutoSave();
+          }
+          document.querySelectorAll('.tab').forEach(t=> t.classList.remove('drag-over'));
+        });
+        
+        // Activate the new tab
+        activateTab(id);
+        
+        // Add to file list with remove button
+        addFileToList(id, filename);
+        
+        showToast('save', `Opened ${filename}`);
+        scheduleAutoSave();
+      };
+      reader.readAsText(file);
+    };
+    input.click();
+  });
+
+  /* ─── Save Script File ─── */
+  document.getElementById('btn-save').addEventListener('click', ()=>{
+    const currentTab = tabs.find(t=> t.id === activeTabId);
+    if(!currentTab){
+      showToast('error', 'No active script to save');
+      return;
+    }
+    
+    const content = currentTab.content || '';
+    const filename = currentTab.filename || `${currentTab.name}.lua`;
+    
+    // Create blob and download
+    const blob = new Blob([content], {type: 'text/plain'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    showToast('save', `Saved ${filename}`);
   });
 
 })();
