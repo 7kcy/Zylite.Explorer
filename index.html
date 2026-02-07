@@ -39,9 +39,14 @@
   .tab:not(.active):hover    { background:rgba(0,152,226,0.12) !important; border-color:rgba(0,152,226,0.25) !important; color:#0098E2 !important; }
 
   .monaco-editor .suggest-widget .monaco-list .list-item.selected,
-  .monaco-editor .suggest-widget .monaco-list .list-item.focused { background:rgba(0,152,226,0.2) !important; }
+  .monaco-editor .suggest-widget .monaco-list .list-item.focused { background:rgba(0,152,226,0.25) !important; }
+  .monaco-editor .suggest-widget .monaco-list .monaco-list-row.selected,
+  .monaco-editor .suggest-widget .monaco-list .monaco-list-row.focused { background:rgba(0,152,226,0.25) !important; }
+  .monaco-editor .suggest-widget .monaco-list .monaco-list-row.focused.selected { background:rgba(0,152,226,0.3) !important; }
+  .monaco-list .monaco-list-row.focused { background:rgba(0,152,226,0.25) !important; }
+  .monaco-list .monaco-list-row.selected { background:rgba(0,152,226,0.25) !important; }
   .monaco-editor .suggest-widget .monaco-list .list-item.selected .label-name,
-  .monaco-editor .suggest-widget .monaco-list .list-item.focused .label-name { color:#fff !important; }
+  .monaco-editor .suggest-widget .monaco-list .list-item.focused .label-name { color:#E8EDF4 !important; }
   .monaco-editor .suggest-widget .detail-pane                   { border-left-color:#007AB5 !important; }
 
   .monaco-editor .find-widget input:focus,
@@ -98,7 +103,7 @@
     padding:0; gap:10px;
     position:relative;
   }
-  .sidebar-header { display:flex; align-items:center; gap:8px; font-size:14px; font-weight:600; color:var(--text); padding:12px; }
+  .sidebar-header { display:flex; align-items:center; gap:8px; font-size:14px; font-weight:600; color:var(--text); padding:12px; height:42px; box-sizing:border-box; padding-top:16px; }
   .sidebar-header svg { width:18px; height:18px; color:var(--text); flex-shrink:0; }
   #file-actions { display:flex; gap:8px; align-items:center; margin-left:auto; margin-right:8px; }
 
@@ -113,13 +118,13 @@
   @keyframes spin { to { transform:rotate(360deg); } }
   .btn-icon svg { width:16px; height:16px; color:var(--text); }
 
-  .files-list { flex:1; overflow-y:auto; padding:0 12px 0 0; display:flex; flex-direction:column; gap:4px; margin-top:4px; }
+  .files-list { flex:1; overflow-y:auto; padding:0 12px 0 0; display:flex; flex-direction:column; gap:4px; margin-top:4px; padding-top:8px; }
   .file-item {
     display:flex; justify-content:space-between; align-items:center;
     padding:8px 8px 8px 12px; border-radius:6px; cursor:pointer; font-size:13px; color:var(--text);
     transition:background .16s, transform .16s;
   }
-  .file-item:hover { background:rgba(255,255,255,0.05); transform:translateX(4px); }
+  .file-item:hover { background:#0098E2; transform:translateX(4px); }
   .file-item .name { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1; margin-right:8px; }
   .file-item .file-icon { width:18px; height:18px; opacity:.85; flex-shrink:0; margin-right:8px; }
   .file-item .remove-file {
@@ -304,8 +309,7 @@
     display:flex;
     gap:8px;
     padding:12px;
-    border-top:1px solid rgba(255,255,255,0.06);
-    background:rgba(0,0,0,0.1);
+    background:var(--bg);
   }
   .btn-footer {
     flex:1;
@@ -345,26 +349,21 @@
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill="currentColor" d="M20 5h-9.586L8.707 3.293A1 1 0 0 0 8 3H4c-1.103 0-2 .897-2 2v14c0 1.103.897 2 2 2h16c1.103 0 2-.897 2-2V7c0-1.103-.897-2-2-2"/></svg>
         <span>Scripts</span>
       </div>
-      <div id="file-actions" style="margin-left:auto">
-        <button id="btn-refresh" class="btn-icon" title="Refresh files" aria-label="Refresh files">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
-        </button>
-      </div>
     </div>
     <div class="files-list" id="files-list" aria-live="polite"></div>
     <div class="sidebar-footer">
-      <button class="btn-footer" id="btn-open" title="Open Script File">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-          <polyline points="7 10 12 15 17 10"/>
-          <line x1="12" y1="15" x2="12" y2="3"/>
-        </svg>
-      </button>
       <button class="btn-footer" id="btn-save" title="Save Script to File">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
           <polyline points="17 21 17 13 7 13 7 21"/>
           <polyline points="7 3 7 8 15 8"/>
+        </svg>
+      </button>
+      <button class="btn-footer" id="btn-open" title="Open Script File">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/>
+          <line x1="12" y1="15" x2="12" y2="3"/>
         </svg>
       </button>
     </div>
@@ -376,6 +375,12 @@
     <div id="tabs-bar" role="tablist" aria-label="Editor Tabs">
       <button id="tab-add" title="New Tab" aria-label="New Tab">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-dasharray="16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M5 12h14"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.5s" values="16;0"/></path><path stroke-dashoffset="16" d="M12 5v14"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.5s" dur="0.5s" to="0"/></path></g></svg>
+      </button>
+      <button id="btn-clear" title="Clear Editor Text" aria-label="Clear Editor Text" style="margin-left:auto; background:transparent; border:none; cursor:pointer; padding:5px; border-radius:6px; display:flex; align-items:center; justify-content:center; color:rgba(232,237,244,0.35); transition:color .15s, background .15s;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="3 6 5 6 21 6"/>
+          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+        </svg>
       </button>
     </div>
     <div id="editor-wrap"><div id="editor"></div></div>
@@ -411,13 +416,36 @@
   /* ─── DOM ─── */
   const tabsBar         = document.getElementById('tabs-bar');
   const tabAddBtn       = document.getElementById('tab-add');
+  const btnClear        = document.getElementById('btn-clear');
   const filesList       = document.getElementById('files-list');
-  const btnRefresh      = document.getElementById('btn-refresh');
   const editorContainer = document.getElementById('editor');
   const ctxMenu         = document.getElementById('ctx-menu');
   const ctxRename       = document.getElementById('ctx-rename');
   const ctxCancel       = document.getElementById('ctx-cancel');
   const toastContainer  = document.getElementById('toast-container');
+
+  /* ─── Clear Editor Button ─── */
+  btnClear.addEventListener('click', ()=>{
+    if(monacoIsReady && editor){
+      editor.setValue('');
+      const t = tabs.find(x=> x.id === activeTabId);
+      if(t){
+        t.content = '';
+        scheduleAutoSave();
+      }
+      showToast('del', 'Editor cleared');
+    }
+  });
+
+  btnClear.addEventListener('mouseenter', ()=>{
+    btnClear.style.color = 'var(--accent-hover)';
+    btnClear.style.background = 'rgba(0,152,226,0.08)';
+  });
+
+  btnClear.addEventListener('mouseleave', ()=>{
+    btnClear.style.color = 'rgba(232,237,244,0.35)';
+    btnClear.style.background = 'transparent';
+  });
 
   /* ═══════════════════ AUTO-SAVE ═══════════════════ */
   function scheduleAutoSave(){
@@ -601,13 +629,6 @@
       else { window.postMessage(obj,'*'); console.log('[postToHost mock]', obj); }
     } catch(e){ console.error(e); }
   }
-
-  /* ═══════════════════ REFRESH ═══════════════════ */
-  btnRefresh.addEventListener('click', ()=>{
-    btnRefresh.classList.add('spinning');
-    requestFileList();
-    setTimeout(()=> btnRefresh.classList.remove('spinning'), 550);
-  });
 
   /* ═══════════════════ TABS ═══════════════════ */
   function renumberTabsDOM(){
@@ -886,7 +907,15 @@
         'editorCursor.foreground':'#007AB5',
         'editorSuggestWidget.background':'#0F172A',
         'editorSuggestWidget.border':'#007AB5',
-        'editorSuggestWidget.selectedBackground':'rgba(0,152,226,0.18)',
+        'editorSuggestWidget.selectedBackground':'rgba(0,152,226,0.25)',
+        'editorSuggestWidget.focusHighlightForeground':'#0098E2',
+        'editorSuggestWidget.highlightForeground':'#0098E2',
+        'list.activeSelectionBackground':'rgba(0,152,226,0.25)',
+        'list.activeSelectionForeground':'#E8EDF4',
+        'list.hoverBackground':'rgba(0,152,226,0.15)',
+        'list.focusBackground':'rgba(0,152,226,0.25)',
+        'list.focusForeground':'#E8EDF4',
+        'list.inactiveSelectionBackground':'rgba(0,152,226,0.2)',
         'scrollbarSlider.background':'#1E293B',
         'scrollbarSlider.hoverBackground':'#334155',
         'scrollbarSlider.activeBackground':'#475569',
